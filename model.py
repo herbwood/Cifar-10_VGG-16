@@ -32,8 +32,7 @@ class VGG(nn.Module):
     def forward(self, x):
         x = self.conv_layers(x)
         x = self.avgpool(x)
-        x = self.fc_layers(torch.flatten(x, start_dim=1))
-        out = F.softmax(x)
+        out = self.fc_layers(torch.flatten(x, start_dim=1))
         return out
 
     def _create_conv_layers(self, architecture):
@@ -52,14 +51,15 @@ class VGG(nn.Module):
     def _create_fc_layers(self, num_classes):
 
         return nn.Sequential(
-            nn.Flatten(),
             nn.Linear(512 * 7 * 7, 4096),
+            nn.ReLU(),
             nn.Linear(4096, 4096),
+            nn.ReLU(),
             nn.Linear(4096, num_classes)
         )
 
 if __name__ == "__main__":
-    image = torch.randn((1, 3, 224, 224))
+    image = torch.randn((2, 3, 32, 32))
     model = VGG()
     output = model(image)
     print(output.shape)
