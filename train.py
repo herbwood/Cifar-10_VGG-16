@@ -6,11 +6,11 @@ from dataloader import Cifar10Dataset
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.05
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-BATCH_SIZE = 256
+BATCH_SIZE = 128
 WEIGHT_DECAY = 0
-EPOCHS = 10
+EPOCHS = 30
 NUM_WORKERS = 2
 
 def train(train_loader, model, optimizer):
@@ -26,12 +26,12 @@ def train(train_loader, model, optimizer):
         loss.backward()
         optimizer.step()
 
-    print(f"Mean loss was {sum(mean_loss) / len(mean_loss)}")
+    print(f"Mean loss : {sum(mean_loss) / len(mean_loss)}")
 
 def main():
     model = VGG().to(DEVICE)
     model.train()
-    optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -46,11 +46,10 @@ def main():
                               shuffle=True)
 
     for epoch in range(EPOCHS):
-        print(f"Epoch : {epoch+1}")
+        print(f"Epoch [{epoch+1}/{EPOCHS}]")
         train(train_loader, model, optimizer)
 
     torch.save(model.state_dict(), "./model.pt")
 
 if __name__ == "__main__":
     main()
-

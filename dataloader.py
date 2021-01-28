@@ -7,8 +7,12 @@ from utils import unpickle
 
 class Cifar10Dataset(Dataset):
 
-    def __init__(self, basepath = "cifar-10-batches-py",
-                 train=True, transform=None):
+    def __init__(self,
+                 basepath : str = "cifar-10-batches-py",
+                 train : bool = True,
+                 transform=None
+                 ) -> None:
+
         self.basepath = basepath
         self.transform = transform
         self.train_list = ['data_batch_1', 'data_batch_2', 'data_batch_3',
@@ -32,10 +36,12 @@ class Cifar10Dataset(Dataset):
         self.data = np.vstack(self.data).reshape(-1, 3, 32, 32)
         self.data = self.data.transpose((0, 2, 3, 1))
 
+
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx):
+
+    def __getitem__(self, idx : int):
         image, label = self.data[idx], self.labels[idx]
         img = Image.fromarray(image)
 
@@ -47,8 +53,4 @@ class Cifar10Dataset(Dataset):
 if __name__ == "__main__":
     dataloader = Cifar10Dataset()
     image, label = dataloader[0]
-    print(image, label)
-    print(image.shape)
-
-
-
+    print(image.shape, label)

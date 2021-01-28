@@ -1,14 +1,13 @@
 import torch
 import torchvision.transforms as transforms
-import torch.optim as optim
 from model import VGG
 from dataloader import Cifar10Dataset
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
-LEARNING_RATE = 0.01
+LEARNING_RATE = 0.05
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-BATCH_SIZE = 256
+BATCH_SIZE = 128
 WEIGHT_DECAY = 0
 NUM_WORKERS = 2
 
@@ -47,9 +46,9 @@ def main():
                              shuffle=False)
 
     test_loss, test_accuracy = evalute(model, test_loader)
-    print(test_loss, test_accuracy)
+
+    print(f"Average Loss : {test_loss:.4f}")
+    print(f"Average Accuracy {test_accuracy:.2f}")
 
 if __name__ == "__main__":
     main()
-
-

@@ -5,7 +5,10 @@ import torch.nn.functional as F
 architecture_config = [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M']
 
 class CNNBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, **kwargs):
+    def __init__(self,
+                 in_channels : int,
+                 out_channels : int,
+                 **kwargs) -> None:
         super(CNNBlock, self).__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, **kwargs)
         self.relu = nn.ReLU()
@@ -14,7 +17,10 @@ class CNNBlock(nn.Module):
         return self.relu(self.conv(x))
 
 class VGG(nn.Module):
-    def __init__(self, in_channels=3, num_classes=10):
+    def __init__(self,
+                 in_channels : int = 3,
+                 num_classes : int = 10
+                 ) -> None:
         super(VGG, self).__init__()
         self.archtecture = architecture_config
         self.in_channels = in_channels
@@ -57,4 +63,3 @@ if __name__ == "__main__":
     model = VGG()
     output = model(image)
     print(output.shape)
-    print(model)
