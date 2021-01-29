@@ -4,6 +4,7 @@ import os
 import numpy as np
 from PIL import Image
 from utils import unpickle
+import torchvision
 
 class Cifar10Dataset(Dataset):
 
@@ -54,3 +55,4 @@ if __name__ == "__main__":
     dataloader = Cifar10Dataset()
     image, label = dataloader[0]
     print(image.shape, label)
+    print(label)
