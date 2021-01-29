@@ -7,7 +7,7 @@ from model import VGG
 from dataloader import Cifar10Dataset
 import torch.nn as nn
 
-LEARNING_RATE = 0.05
+LEARNING_RATE = 0.0001
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE = 128
 EPOCHS = 30
