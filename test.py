@@ -4,10 +4,16 @@ from model import VGG
 from dataloader import Cifar10Dataset
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+import argparse
+
+parser = argparse.ArgumentParser(description="VGG Training")
+parser.add_argument("--batch", "--batch-size", default=128, type=int,
+                    metavar="B", help='mini-batch size')
+parser.add_argument('--workers', '--num-workers', default=2, type=int, metavar='W',
+                    help='number of data loading workers')
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-BATCH_SIZE = 128
-NUM_WORKERS = 2
+
 
 def topkaccuracy(output, target, topk=(1,)):
     maxk = max(topk)
@@ -24,6 +30,7 @@ def topkaccuracy(output, target, topk=(1,)):
     return res
 
 def evalute_fn(model, test_loader):
+
     model.eval()
     test_loss, correct, prec1, prec5 = 0, 0, 0, 0
 
@@ -49,6 +56,8 @@ def evalute_fn(model, test_loader):
     return test_loss, test_accuracy, test_prec1, test_prec5
 
 def evaluate():
+    args = parser.parse_args()
+
     model = VGG().to(DEVICE)
     state = torch.load("./model.pt")
     model.load_state_dict(state['model_state_dict'])
@@ -61,8 +70,8 @@ def evaluate():
     test_dataset = Cifar10Dataset(train=False, transform=transform)
 
     test_loader = DataLoader(dataset=test_dataset,
-                             batch_size=BATCH_SIZE,
-                             num_workers=NUM_WORKERS,
+                             batch_size=args.batch,
+                             num_workers=args.workers,
                              shuffle=False)
 
     test_loss, test_accuracy, test_prec1, test_prec5 = evalute_fn(model, test_loader)
@@ -73,4 +82,5 @@ def evaluate():
     print(f"Top-5 Accuracy : {test_prec5:.2f}%")
 
 if __name__ == "__main__":
+    # python evaluate.py --batch 128 --workers 2
     evaluate()
