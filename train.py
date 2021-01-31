@@ -1,18 +1,23 @@
 import torch
+import torch.nn as nn
 import torchvision.transforms as transforms
 import torch.optim as optim
-from torch.optim import lr_scheduler
-import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from model import VGG
 from dataloader import Cifar10Dataset
-import torch.nn as nn
+import argparse
 
-LEARNING_RATE = 0.0001
+parser = argparse.ArgumentParser(description="VGG Training")
+parser.add_argument("--epochs", default=50, type=int, metavar='N',
+                    help='number of total epochs to run')
+parser.add_argument("--lr", '--learning-rate', default=0.0001, type=float,
+                    metavar='LR', help='inital learning rate')
+parser.add_argument("--batch", "--batch-size", default=128, type=int,
+                    metavar="B", help='mini-batch size')
+parser.add_argument('--workers', '--num-workers', default=2, type=int, metavar='W',
+                    help='number of data loading workers')
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-BATCH_SIZE = 128
-EPOCHS = 30
-NUM_WORKERS = 2
 
 
 def train_fn(train_loader, model, optimizer, criterion, epoch):
@@ -41,9 +46,11 @@ def train_fn(train_loader, model, optimizer, criterion, epoch):
     return loss
 
 def train():
+    args = parser.parse_args()
+
     model = VGG().to(DEVICE)
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
     criterion = nn.CrossEntropyLoss()
 
     transform = transforms.Compose([
@@ -52,14 +59,14 @@ def train():
 
     train_dataset = Cifar10Dataset(train=True, transform=transform)
     train_loader = DataLoader(dataset=train_dataset,
-                              batch_size=BATCH_SIZE,
-                              num_workers=NUM_WORKERS,
+                              batch_size=args.batch,
+                              num_workers=args.workers,
                               shuffle=True)
 
     leastloss = 1e+5
 
-    for epoch in range(1, EPOCHS + 1):
-        print(f"Epoch [{epoch}/{EPOCHS}]")
+    for epoch in range(1, args.epochs + 1):
+        print(f"Epoch [{epoch}/{args.epochs}]")
         loss = train_fn(train_loader, model, optimizer, criterion, epoch)
         scheduler.step()
 
@@ -69,11 +76,12 @@ def train():
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 'loss': criterion,
-            }, f'model_epoch_{epoch}_loss_{loss}.pt')
+            }, 'model.pt')
 
             leastloss = loss
 
             print(f"saved model with loss : {leastloss:.4f}")
 
 if __name__ == "__main__":
+    # python train.py --epochs 50 --batch 128 --lr 0.0001 --workers 2
     train()
