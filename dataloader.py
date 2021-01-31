@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 import os
 import numpy as np
 from PIL import Image
-from utils import unpickle
+from utils import unpickle, download_dataset
 import torchvision
 
 class Cifar10Dataset(Dataset):
@@ -11,7 +11,8 @@ class Cifar10Dataset(Dataset):
     def __init__(self,
                  basepath : str = "cifar-10-batches-py",
                  train : bool = True,
-                 transform=None
+                 transform=None,
+                 download : bool = True
                  ) -> None:
 
         self.basepath = basepath
@@ -22,6 +23,9 @@ class Cifar10Dataset(Dataset):
 
         self.data = []
         self.labels = []
+
+        if download:
+            download_dataset()
 
         if train:
             downloaded_list = self.train_list
