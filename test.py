@@ -19,7 +19,7 @@ def topkaccuracy(output, target, topk=(1,)):
 
     res = []
     for k in topk:
-        correct_k = correct[:k].view(-1).float().sum(0)
+        correct_k = correct[:k].reshape(-1).float().sum(0)
         res.append(correct_k.mul_(100.0 / batch_size))
     return res
 
@@ -30,14 +30,16 @@ def evalute_fn(model, test_loader):
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(DEVICE), target.to(DEVICE)
-            output = model(data)
 
-            test_loss += F.cross_entropy(output, target, reduction='sum').item()
-            pred = output.max(1, keepdim=True)[1]
-            correct += pred.eq(target.view_as(pred)).sum.item()
+            with torch.set_grad_enabled(False):
+                output = model(data)
 
-            prec1 += topkaccuracy(output.data, target)[0]
-            prec5 += topkaccuracy(output.data, target, topk=(5, ))[0]
+                test_loss += F.cross_entropy(output, target, reduction='sum').item()
+                pred = output.max(1, keepdim=True)[1]
+                correct += pred.eq(target.view_as(pred)).sum().item()
+
+                prec1 += topkaccuracy(output.data, target)[0]
+                prec5 += topkaccuracy(output.data, target, topk=(5, ))[0]
 
     test_loss /= len(test_loader.dataset)
     test_accuracy = 100. * correct / len(test_loader.dataset)
@@ -48,7 +50,8 @@ def evalute_fn(model, test_loader):
 
 def evaluate():
     model = VGG().to(DEVICE)
-    model.load_state_dict(torch.load("./model.pt"))
+    state = torch.load("./model.pt")
+    model.load_state_dict(state['model_state_dict'])
 
     transform = transforms.Compose([
         transforms.ToTensor(),
